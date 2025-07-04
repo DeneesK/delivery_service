@@ -1,3 +1,8 @@
+from uuid import uuid4
+
+import anyio
+import anyio.to_thread
+from celery import Celery  # type: ignore
 from db.db import AsyncSessionFactory
 from db.models.parcel import Parcel, ParcelType
 from services.common import DBObjectService
@@ -5,21 +10,29 @@ from sqlalchemy import select
 
 
 class ParcelService(DBObjectService):
+    def __init__(self, session_maker: AsyncSessionFactory, task_client: Celery) -> None:
+        super().__init__(session_maker)
+        self.task_client = task_client
+
     async def new_parcel(
         self, name: str, weight: float, parcel_type: str, content_value_usd: float, owner: str
-    ) -> Parcel:
-        """Create new parcel"""
-        async with self.session_maker() as session:
-            async with session.begin():
-                parcel = Parcel(
-                    name=name,
-                    weight=weight,
-                    parcel_type=parcel_type,
-                    content_value_usd=content_value_usd,
-                    owner=owner,
-                )
-                session.add(parcel)
-        return parcel
+    ) -> str:
+        """Send task to register new parcel"""
+        parcel_id = str(uuid4())
+        parcel_data = {
+            "name": name,
+            "weight": weight,
+            "parcel_type": parcel_type,
+            "content_value_usd": content_value_usd,
+            "owner": owner,
+            "parcel_id": parcel_id,
+        }
+        await anyio.to_thread.run_sync(
+            lambda: self.task_client.send_task(
+                "consumer.tasks.register_parcel_task", args=[parcel_data]
+            )
+        )
+        return parcel_id
 
     async def get_by_id(self, parcel_id: str) -> Parcel | None:
         """Get parcel by parcel_id"""
@@ -59,5 +72,5 @@ class ParcelService(DBObjectService):
             return list(result.scalars().all())
 
 
-def get_parcel_service(session_maker: AsyncSessionFactory) -> ParcelService:
-    return ParcelService(session_maker)
+def get_parcel_service(session_maker: AsyncSessionFactory, task_client: Celery) -> ParcelService:
+    return ParcelService(session_maker, task_client)

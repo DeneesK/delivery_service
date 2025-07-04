@@ -4,8 +4,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
-    DATABASE_URL: MySQLDsn
     BROKER_URL: str
-    SECRET_KEY: str
-    DESCRIPTION: str
+    DATABASE_URL: MySQLDsn
+    CELERY_BACKEND: str
+    CURRENCY_RATE_URL: str
     IS_DEV_MODE: bool = True
+
+
+config = Settings()  # type: ignore

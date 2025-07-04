@@ -1,9 +1,11 @@
 from functools import lru_cache
 
+from celery import Celery  # type: ignore
 from core.conf import Settings
 from db.db import AsyncSessionFactory
 from punq import Container, Scope  # type: ignore
 from services.parcel import ParcelService, get_parcel_service
+from task_producer.producer import get_client
 
 
 @lru_cache(1)
@@ -24,9 +26,15 @@ def _init_container() -> Container:
         scope=Scope.singleton,
     )
 
+    container.register(Celery, instance=get_client(config.BROKER_URL), scope=Scope.singleton)
+
     session_maker = container.resolve(AsyncSessionFactory)
+    task_client = container.resolve(Celery)
 
     container.register(
-        ParcelService, instance=get_parcel_service(session_maker), scope=Scope.singleton
+        ParcelService,
+        instance=get_parcel_service(session_maker, task_client),
+        scope=Scope.singleton,
     )
+
     return container

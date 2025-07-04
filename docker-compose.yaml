@@ -30,5 +30,15 @@ services:
     command: [ "make", "start_app" ]
     ports:
       - "8000:8000"
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+  cache:
+    image: redis:alpine
+    restart: always
+    volumes: 
+      - cache:/var/lib/redis/data
 volumes:
   mysql-db:
