@@ -1,0 +1,24 @@
+repos:
+  # Black для автоформатирования кода
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black
+        args: ["--line-length=100"]
+        exclude: 'migrations/'
+
+  # Flake8 для анализа кода и поиска ошибок
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+        args: ["--max-line-length=100"]
+        exclude: 'migrations/'
+
+  # isort для сортировки импортов
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ["--profile=black"]
+        exclude: 'migrations/'

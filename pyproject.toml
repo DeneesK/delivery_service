@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "delivery-service"
+version = "0.1.0"
+description = ""
+authors = ["Denis Kalbasov <kds-ru@list.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115.14"
+punq = "^0.7.0"
+pydantic = "^2.11.7"
+pydantic-settings = "^2.10.1"
+orjson = "^3.10.18"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.41"}
+alembic = "^1.16.2"
+aiomysql = "^0.2.0"
+
+
+[tool.poetry.group.dev.dependencies]
+pre-commit = "^4.2.0"
+black = "^25.1.0"
+flake8 = "^7.3.0"
+isort = "^6.0.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 100
+target-version = ['py312']
+
+[tool.isort]
+profile = "black"
+line_length = 100
