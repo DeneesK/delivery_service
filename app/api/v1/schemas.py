@@ -1,4 +1,12 @@
+from enum import Enum
+
 from pydantic import BaseModel, ConfigDict
+
+
+class ParcelTypeEnum(str, Enum):
+    clothes = "clothes"
+    electronics = "electronics"
+    miscellaneous = "miscellaneous"
 
 
 class BaseSchema(BaseModel):
@@ -8,7 +16,7 @@ class BaseSchema(BaseModel):
 class NewParcel(BaseSchema):
     name: str
     weight: float
-    parcel_type: str
+    parcel_type: ParcelTypeEnum
     content_value_usd: float
 
 

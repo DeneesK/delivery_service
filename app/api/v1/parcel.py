@@ -32,7 +32,11 @@ async def new_parcel(
     try:
         owner: str = request.session["session_id"]
         parcel_service: ParcelService = container.resolve(ParcelService)
-        result = await parcel_service.new_parcel(**new_parcel.model_dump(), owner=owner)
+        result = await parcel_service.new_parcel(
+            **new_parcel.model_dump(exclude={"parcel_type"}),
+            parcel_type=new_parcel.parcel_type.value,
+            owner=owner,
+        )
         out_parcel = ParcelCreated.model_validate(result)
         return out_parcel
     except KeyError:

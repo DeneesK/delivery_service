@@ -16,6 +16,9 @@ sqlalchemy = {extras = ["asyncio"], version = "^2.0.41"}
 alembic = "^1.16.2"
 aiomysql = "^0.2.0"
 uvicorn = "^0.35.0"
+python-dotenv = "^1.1.1"
+pymysql = "^1.1.1"
+cryptography = "^45.0.5"
 
 
 [tool.poetry.group.dev.dependencies]
