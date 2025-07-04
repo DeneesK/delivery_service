@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 logger = logging.getLogger(__name__)
 
 
-@app.task(name="consumer.tasks.register_parcel_task")
+@app.task(name="consumer.tasks.register_parcel_task", acks_late=True)
 def register_parcel_task(parcel_data: dict):
     session: Session = SessionLocal()
     try:
