@@ -17,7 +17,7 @@ services:
   delivery_app:
     build:
       context: ./
-      dockerfile: app/Dockerfile
+      dockerfile: delivery_app/Dockerfile
     depends_on:
       mysql-db:
         condition: service_healthy
