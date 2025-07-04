@@ -44,7 +44,7 @@ async def new_parcel(
         logger.warning("Unauthorized access attempt to create parcel")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
     except Exception as e:
-        logger.error(f"Error creating parcel: {e}", exc_info=True)
+        logger.error("Error creating parcel: %s", e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error"
         )
@@ -64,7 +64,7 @@ async def parcel_types(
         p_types = ParcelTypes(parcel_types=[ParcelType.model_validate(pt) for pt in result])
         return p_types
     except Exception as e:
-        logger.error(f"Error creating parcel: {e}", exc_info=True)
+        logger.error("Error creating parcel: %s", e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error"
         )
@@ -110,7 +110,7 @@ async def get_parcels(
         logger.info("Unauthorized access attempt to create parcel")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
     except Exception as e:
-        logger.error(f"Error creating parcel: {e}", exc_info=True)
+        logger.error("Error creating parcel: %s", e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error"
         )
@@ -139,7 +139,7 @@ async def get_parcel_by_id(
         parcel = ParcelOut.model_validate(result)
         return parcel
     except Exception as e:
-        logger.error(f"Error creating parcel: {e}", exc_info=True)
+        logger.error("Error creating parcel: : %s", e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error"
         )

@@ -1,14 +1,19 @@
+import logging
+
 from celery_app import app
 from currency_rate import get_usd_to_rub
 from db.db import SessionLocal
 from db.models.parcel import Parcel
 from sqlalchemy.orm import Session
 
+logger = logging.getLogger(__name__)
+
 
 @app.task(name="consumer.tasks.register_parcel_task")
 def register_parcel_task(parcel_data: dict):
     session: Session = SessionLocal()
     try:
+        logger.info("New task got, from %s", parcel_data["owner"])
         usd_rate = get_usd_to_rub()
 
         weight = parcel_data["weight"]
@@ -26,7 +31,9 @@ def register_parcel_task(parcel_data: dict):
 
         session.add(parcel)
         session.commit()
-    except Exception:
+        logger.info("Task finished, from %s", parcel_data["owner"])
+    except Exception as e:
+        logger.error("Error during register parcel task %s", e, exc_info=True)
         session.rollback()
         raise
     finally:
