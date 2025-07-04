@@ -33,7 +33,7 @@ flake8 = "^7.3.0"
 isort = "^6.0.1"
 
 
-[tool.poetry.group.calculator_app.dependencies]
+[tool.poetry.group.register_app.dependencies]
 celery = "^5.5.3"
 kombu = "^5.5.4"
 aiohttp = "^3.12.13"
