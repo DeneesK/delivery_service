@@ -58,6 +58,14 @@ def mock_task_client():
 
 
 @pytest.fixture
+def mock_cache_client():
+    cache_client = AsyncMock()
+    cache_client.get = AsyncMock(return_value="cache_value")
+    cache_client.set = AsyncMock(return_value=None)
+    return cache_client
+
+
+@pytest.fixture
 def mock_parcel_service(mock_session, mock_task_client):
     mock_session_context_manager = MagicMock()
     mock_session_context_manager.__aenter__ = AsyncMock(return_value=mock_session)

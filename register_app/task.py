@@ -1,7 +1,7 @@
 import logging
 
 from celery_app import app
-from currency_rate import get_usd_to_rub
+from register_app.utils.currency_rate import get_usd_to_rub
 from db.db import SessionLocal
 from db.models.parcel import Parcel
 from sqlalchemy.orm import Session
@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 
 @app.task(name="consumer.tasks.register_parcel_task", acks_late=True)
 def register_parcel_task(parcel_data: dict):
+    """save new parcel to db and calculate delivery cost"""
     session: Session = SessionLocal()
     try:
         logger.info("New task got, from %s", parcel_data["owner"])
