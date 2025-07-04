@@ -16,7 +16,10 @@ class Parcel(Base):
         String(36), primary_key=True, default=lambda: str(uuid.uuid4()), unique=True, nullable=False
     )
     name: Mapped[str]
+    owner: Mapped[str]
     weight: Mapped[float]
+    content_value_usd: Mapped[float]
+    delivery_cost_rub: Mapped[float]
     parcel_type: Mapped[str] = mapped_column(
         String(50), ForeignKey("parcel_types.name"), nullable=False
     )

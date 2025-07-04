@@ -21,8 +21,13 @@ class ParcelOut(ParcelCreated):
 
 
 class Parcels(BaseSchema):
-    parcels: list[ParcelOut]
+    parcels: list[ParcelOut | None]
+
+
+class ParcelType(BaseSchema):
+    id: int
+    name: str
 
 
 class ParcelTypes(BaseSchema):
-    pass
+    pacel_types: list[ParcelType]

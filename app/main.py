@@ -7,6 +7,7 @@ from core.di_container import init_container
 from db.db import AsyncSessionFactory
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
+from middleware import SessionIDMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 
@@ -16,6 +17,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     config: Settings = container.resolve(Settings)
 
     app.add_middleware(SessionMiddleware, secret_key=config.SECRET_KEY)
+    app.add_middleware(SessionIDMiddleware)
+
     app.description = config.DESCRIPTION
     yield
     session_factory: AsyncSessionFactory = container.resolve(AsyncSessionFactory)

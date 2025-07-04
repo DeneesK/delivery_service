@@ -21,4 +21,5 @@ repos:
     hooks:
       - id: isort
         args: ["--profile=black"]
+        known_first_party: ["app", "delivery_service"]
         exclude: 'migrations/'
