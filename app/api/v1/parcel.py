@@ -1,8 +1,9 @@
 import logging
+from typing import Optional
 
-from api.v1.schemas import NewParcel, ParcelCreated, ParcelOut, Parcels, ParcelTypes
+from api.v1.schemas import NewParcel, ParcelCreated, ParcelOut, Parcels, ParcelType, ParcelTypes
 from core.di_container import init_container
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from punq import Container  # type: ignore
 from services.parcel import ParcelService
 
@@ -60,8 +61,8 @@ async def parcel_types(
     try:
         parcel_service: ParcelService = container.resolve(ParcelService)
         result = await parcel_service.parcel_types()
-        parcel_types = ParcelTypes.model_validate(result)
-        return parcel_types
+        p_types = ParcelTypes(parcel_types=[ParcelType.model_validate(pt) for pt in result])
+        return p_types
     except Exception as e:
         logger.error(f"Error creating parcel: {e}", exc_info=True)
         raise HTTPException(
@@ -82,13 +83,29 @@ async def parcel_types(
 async def get_parcels(
     request: Request,
     container: Container = Depends(init_container),
+    parcel_type: Optional[str] = Query(None, description="Filter by parcel type "),
+    has_delivery_cost: bool = Query(
+        False, description="Filter by whether delivery cost is calculated"
+    ),
+    limit: int = Query(100, ge=1, description="Limit number of results"),
+    offset: int = Query(0, ge=0, description="Number of results to skip"),
 ) -> Parcels:
     try:
         owner: str = request.session["session_id"]
         parcel_service: ParcelService = container.resolve(ParcelService)
-        result = await parcel_service.get_all_parcels(owner=owner)
-        parcels = Parcels.model_validate(result)
-        return parcels
+
+        result = await parcel_service.get_all_parcels(
+            owner=owner,
+            parcel_type=parcel_type,
+            has_delivery_cost=has_delivery_cost,
+            limit=limit,
+            offset=offset,
+        )
+
+        if result:
+            parcels = Parcels(parcels=[ParcelOut.model_validate(p) for p in result])
+            return parcels
+        return Parcels(parcels=[None])
     except KeyError:
         logger.info("Unauthorized access attempt to create parcel")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")

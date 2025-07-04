@@ -19,9 +19,10 @@ class Parcel(Base):
     owner: Mapped[str] = mapped_column(String(256))
     weight: Mapped[float]
     content_value_usd: Mapped[float]
-    delivery_cost_rub: Mapped[float]
+    delivery_cost_rub: Mapped[float] = mapped_column(nullable=True)
     parcel_type: Mapped[str] = mapped_column(
         String(256),
         ForeignKey("parceltype.name"),
         nullable=False,
     )
+    parceltype: Mapped["ParcelType"] = relationship(back_populates="parcels")

@@ -13,6 +13,7 @@ class ParcelService(DBObjectService):
             async with session.begin():
                 parcel = Parcel(
                     name=name,
+                    weight=weight,
                     parcel_type=parcel_type,
                     content_value_usd=content_value_usd,
                     owner=owner,
@@ -32,10 +33,29 @@ class ParcelService(DBObjectService):
             result = await session.execute(select(ParcelType))
             return list(result.scalars().all())
 
-    async def get_all_parcels(self, owner: str) -> list[Parcel | None]:
-        """Get all parcels by owner"""
+    async def get_all_parcels(
+        self,
+        owner: str,
+        parcel_type: str | None,
+        has_delivery_cost: bool,
+        limit: int = 100,
+        offset: int = 0,
+    ) -> list[Parcel | None]:
+        """Get all parcels by owner, optionally filtered"""
         async with self.session_maker() as session:
-            result = await session.execute(select(Parcel).where(Parcel.owner == owner))
+            stmt = select(Parcel).where(Parcel.owner == owner)
+
+            if parcel_type:
+                stmt = stmt.where(Parcel.parcel_type == parcel_type)
+
+            if has_delivery_cost:
+                stmt = stmt.where(Parcel.delivery_cost_rub.is_not(None))
+            else:
+                stmt = stmt.where(Parcel.delivery_cost_rub.is_(None))
+
+            stmt = stmt.offset(offset).limit(limit)
+
+            result = await session.execute(stmt)
             return list(result.scalars().all())
 
 

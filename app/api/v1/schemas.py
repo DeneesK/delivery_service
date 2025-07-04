@@ -1,6 +1,7 @@
 from enum import Enum
+from typing import Optional, Union
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_serializer
 
 
 class ParcelTypeEnum(str, Enum):
@@ -25,7 +26,11 @@ class ParcelCreated(NewParcel):
 
 
 class ParcelOut(ParcelCreated):
-    delivery_cost_rub: str | float
+    delivery_cost_rub: Optional[float | str]
+
+    @field_serializer("delivery_cost_rub", return_type=Union[float, str])
+    def serialize_delivery_cost_rub(self, value):
+        return value if value is not None else "Not calculated"
 
 
 class Parcels(BaseSchema):
@@ -38,4 +43,4 @@ class ParcelType(BaseSchema):
 
 
 class ParcelTypes(BaseSchema):
-    pacel_types: list[ParcelType]
+    parcel_types: list[ParcelType]

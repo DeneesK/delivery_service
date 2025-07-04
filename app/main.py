@@ -16,9 +16,6 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     container = init_container()
     config: Settings = container.resolve(Settings)
 
-    app.add_middleware(SessionMiddleware, secret_key=config.SECRET_KEY)
-    app.add_middleware(SessionIDMiddleware)
-
     app.description = config.DESCRIPTION
     yield
     session_factory: AsyncSessionFactory = container.resolve(AsyncSessionFactory)
@@ -32,6 +29,11 @@ def create_app() -> FastAPI:
         docs_url="/api/openapi",
         openapi_url="/api/openapi.json",
         default_response_class=ORJSONResponse,
+        lifespan=lifespan,
     )
+    container = init_container()
+    config: Settings = container.resolve(Settings)
+    app.add_middleware(SessionIDMiddleware)
+    app.add_middleware(SessionMiddleware, secret_key=config.SECRET_KEY)
     app.include_router(v1_router)
     return app

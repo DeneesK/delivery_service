@@ -33,7 +33,7 @@ def upgrade() -> None:
     sa.Column('owner', sa.String(length=256), nullable=False),
     sa.Column('weight', sa.Float(), nullable=False),
     sa.Column('content_value_usd', sa.Float(), nullable=False),
-    sa.Column('delivery_cost_rub', sa.Float(), nullable=False),
+    sa.Column('delivery_cost_rub', sa.Float(), nullable=True),
     sa.Column('parcel_type', sa.String(length=256), nullable=False),
     sa.ForeignKeyConstraint(['parcel_type'], ['parceltype.name'], ),
     sa.PrimaryKeyConstraint('parcel_id'),
