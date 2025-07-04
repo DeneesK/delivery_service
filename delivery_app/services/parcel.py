@@ -3,10 +3,11 @@ from uuid import uuid4
 import anyio
 import anyio.to_thread
 from celery import Celery  # type: ignore
+from sqlalchemy import select
+
 from db.db import AsyncSessionFactory
 from db.models.parcel import Parcel, ParcelType
 from services.common import DBObjectService
-from sqlalchemy import select
 
 
 class ParcelService(DBObjectService):
@@ -28,9 +29,7 @@ class ParcelService(DBObjectService):
             "parcel_id": parcel_id,
         }
         await anyio.to_thread.run_sync(
-            lambda: self.task_client.send_task(
-                "consumer.tasks.register_parcel_task", args=[parcel_data]
-            )
+            lambda: self.task_client.send_task("consumer.tasks.register_parcel_task", [parcel_data])
         )
         return parcel_id
 

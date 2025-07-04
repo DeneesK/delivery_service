@@ -1,6 +1,9 @@
 import logging
 from typing import Optional
 
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
+from punq import Container  # type: ignore
+
 from api.v1.schemas import (
     NewParcel,
     ParcelCreated,
@@ -11,8 +14,6 @@ from api.v1.schemas import (
     ParcelTypes,
 )
 from core.di_container import init_container
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
-from punq import Container  # type: ignore
 from services.parcel import ParcelService
 
 logger = logging.getLogger("app")
@@ -113,6 +114,8 @@ async def get_parcels(
             parcels = Parcels(parcels=[ParcelOut.model_validate(p) for p in result])
             return parcels
         return Parcels(parcels=[None])
+    except HTTPException as e:
+        raise e
     except KeyError:
         logger.info("Unauthorized access attempt to create parcel")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
@@ -145,6 +148,8 @@ async def get_parcel_by_id(
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Parcel not found")
         parcel = ParcelOut.model_validate(result)
         return parcel
+    except HTTPException as e:
+        raise e
     except Exception as e:
         logger.error("Error creating parcel: : %s", e, exc_info=True)
         raise HTTPException(

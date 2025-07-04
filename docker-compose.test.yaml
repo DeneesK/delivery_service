@@ -1,0 +1,68 @@
+services:
+  mysql-db-test:
+    image: mysql:8.0
+    container_name: mysql-db-test
+    restart: always
+    volumes:
+      - mysql-db-test:/var/lib/mysql
+    env_file:
+      - .env
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u$$MYSQL_USER", "-p$$MYSQL_PASSWORD"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+  test-rabbitmq:
+    image: rabbitmq:3-management
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+  delivery_app_test:
+    build:
+      context: ./
+      dockerfile: delivery_app/Dockerfile
+    depends_on:
+      mysql-db-test:
+        condition: service_healthy
+      test-rabbitmq:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: mysql+aiomysql://user:password@mysql-db-test:3306/mydb
+      BROKER_URL: amqp://guest:guest@test-rabbitmq:5672//
+      SECRET_KEY: supersecret
+      DESCRIPTION: "Test environment"
+    volumes:
+      - ./delivery_app:/app
+    command: [ "make", "start_app" ]
+    ports:
+      - "8000:8000"
+  tests:
+    build:
+      context: ./
+      dockerfile: tests/Dockerfile
+    command: ["bash", "-c", "sleep 20 && make start-tests"]
+    depends_on:
+      - delivery_app_test
+  parcel_register_app:
+    build:
+      context: ./
+      dockerfile: register_app/Dockerfile
+    depends_on:
+      - delivery_app_test
+    environment:
+      DATABASE_URL: mysql+pymysql://user:password@mysql-db-test:3306/mydb
+      BROKER_URL: amqp://guest:guest@test-rabbitmq:5672//
+      REDIS_URL: redis://cache-test:6379/0
+    command: [ "make", "start_app" ]
+  cache-test:
+    image: redis:alpine
+    restart: always
+    volumes: 
+      - cache-test:/var/lib/redis/data
+volumes:
+  mysql-db-test:
+  cache-test:

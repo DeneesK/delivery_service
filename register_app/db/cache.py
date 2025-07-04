@@ -1,5 +1,6 @@
-from core.conf import config
 from redis import Redis
+
+from core.conf import config
 
 
 def get_cache():

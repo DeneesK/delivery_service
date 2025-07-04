@@ -21,6 +21,7 @@ def register_parcel_task(parcel_data: dict):
         delivery_cost_rub = round((weight * 0.5 + content_value_usd * 0.01) * usd_rate, 2)
 
         parcel = Parcel(
+            parcel_id=parcel_data["parcel_id"],
             name=parcel_data["name"],
             weight=weight,
             parcel_type=parcel_data["parcel_type"],

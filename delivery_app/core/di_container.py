@@ -1,9 +1,10 @@
 from functools import lru_cache
 
 from celery import Celery  # type: ignore
+from punq import Container, Scope  # type: ignore
+
 from core.conf import Settings
 from db.db import AsyncSessionFactory
-from punq import Container, Scope  # type: ignore
 from services.parcel import ParcelService, get_parcel_service
 from task_producer.producer import get_client
 

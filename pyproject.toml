@@ -31,6 +31,10 @@ pre-commit = "^4.2.0"
 black = "^25.1.0"
 flake8 = "^7.3.0"
 isort = "^6.0.1"
+pytest = "^8.4.1"
+pytest-asyncio = "^1.0.0"
+httpx = "^0.28.1"
+pytest-mock = "^3.14.1"
 
 
 [tool.poetry.group.register_app.dependencies]
@@ -56,3 +60,6 @@ target-version = ['py312']
 profile = "black"
 known_first_party = ["app", "delivery_service"]
 line_length = 100
+
+[tool.mypy]
+exclude = "^tests/"

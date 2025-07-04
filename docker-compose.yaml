@@ -22,7 +22,7 @@ services:
       mysql-db:
         condition: service_healthy
     volumes:
-      - ./app:/app
+      - ./delivery_app:/app
     command: [ "make", "start_app" ]
     ports:
       - "8000:8000"
