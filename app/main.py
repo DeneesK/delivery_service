@@ -25,7 +25,6 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 def create_app() -> FastAPI:
     app = FastAPI(
         title="Delivery Service",
-        description="...",
         version="1.0.0",
         docs_url="/api/openapi",
         openapi_url="/api/openapi.json",
