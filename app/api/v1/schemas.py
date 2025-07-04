@@ -25,6 +25,10 @@ class ParcelCreated(NewParcel):
     parcel_id: str
 
 
+class ParcelID(BaseSchema):
+    parcel_id: str
+
+
 class ParcelOut(ParcelCreated):
     delivery_cost_rub: Optional[float | str]
 

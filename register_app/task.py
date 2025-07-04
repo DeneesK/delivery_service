@@ -23,7 +23,7 @@ def register_parcel_task(parcel_data: dict):
         parcel = Parcel(
             name=parcel_data["name"],
             weight=weight,
-            type_id=parcel_data["type_id"],
+            parcel_type=parcel_data["parcel_type"],
             content_value_usd=content_value_usd,
             delivery_cost_rub=delivery_cost_rub,
             owner=parcel_data["owner"],

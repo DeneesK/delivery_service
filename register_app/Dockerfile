@@ -16,9 +16,11 @@ FROM python:3.12-slim
 RUN apt-get update && apt-get install -y make gcc g++ gettext && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
+ENV PYTHONPATH=/app
+
 
 COPY --from=builder /app/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY register_app/* .
+COPY register_app/ . 
 

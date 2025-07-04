@@ -1,7 +1,15 @@
 import logging
 from typing import Optional
 
-from api.v1.schemas import NewParcel, ParcelCreated, ParcelOut, Parcels, ParcelType, ParcelTypes
+from api.v1.schemas import (
+    NewParcel,
+    ParcelCreated,
+    ParcelID,
+    ParcelOut,
+    Parcels,
+    ParcelType,
+    ParcelTypes,
+)
 from core.di_container import init_container
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from punq import Container  # type: ignore
@@ -14,11 +22,11 @@ router = APIRouter(prefix="/parcels", tags=["Parcel"])
 @router.post(
     "/",
     description="Register the parcel",
-    response_model=ParcelCreated,
-    status_code=status.HTTP_201_CREATED,
+    response_model=ParcelID,
+    status_code=status.HTTP_202_ACCEPTED,
     responses={
-        status.HTTP_201_CREATED: {
-            "description": "Parcel created successfully",
+        status.HTTP_202_ACCEPTED: {
+            "description": "Parcel accepted to register",
             "model": ParcelCreated,
         },
         status.HTTP_401_UNAUTHORIZED: {"description": "Unauthorized — missing or invalid session"},
@@ -29,19 +37,18 @@ async def new_parcel(
     request: Request,
     new_parcel: NewParcel,
     container: Container = Depends(init_container),
-) -> ParcelCreated:
+) -> ParcelID:
     try:
         owner: str = request.session["session_id"]
         parcel_service: ParcelService = container.resolve(ParcelService)
-        result = await parcel_service.new_parcel(
+        parcel_id = await parcel_service.new_parcel(
             **new_parcel.model_dump(exclude={"parcel_type"}),
             parcel_type=new_parcel.parcel_type.value,
             owner=owner,
         )
-        out_parcel = ParcelCreated.model_validate(result)
-        return out_parcel
+        return ParcelID(parcel_id=parcel_id)
     except KeyError:
-        logger.warning("Unauthorized access attempt to create parcel")
+        logger.error("Unauthorized access attempt to create parcel")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
     except Exception as e:
         logger.error("Error creating parcel: %s", e, exc_info=True)
