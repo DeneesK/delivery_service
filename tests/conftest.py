@@ -13,6 +13,7 @@ from fastapi.testclient import TestClient  # noqa
 from unittest.mock import AsyncMock, MagicMock  # noqa
 
 from delivery_app.services.parcel import ParcelService  # noqa
+from delivery_app.services.cache import CacheService  # noqa
 
 
 @pytest.fixture
@@ -58,14 +59,6 @@ def mock_task_client():
 
 
 @pytest.fixture
-def mock_cache_client():
-    cache_client = AsyncMock()
-    cache_client.get = AsyncMock(return_value="cache_value")
-    cache_client.set = AsyncMock(return_value=None)
-    return cache_client
-
-
-@pytest.fixture
 def mock_parcel_service(mock_session, mock_task_client):
     mock_session_context_manager = MagicMock()
     mock_session_context_manager.__aenter__ = AsyncMock(return_value=mock_session)
@@ -76,3 +69,13 @@ def mock_parcel_service(mock_session, mock_task_client):
         task_client=mock_task_client,
     )
     return service
+
+
+@pytest.fixture
+def redis_mock():
+    return AsyncMock()
+
+
+@pytest.fixture
+def cache_service(redis_mock):
+    return CacheService(cache_client=redis_mock, ttl=60)

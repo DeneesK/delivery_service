@@ -1,5 +1,7 @@
+from typing import Optional
+
 import orjson
-from aioredis import Redis
+from redis.asyncio import Redis
 
 
 class CacheService:
@@ -7,10 +9,12 @@ class CacheService:
         self.cache = cache_client
         self.ttl = ttl
 
-    async def get(self, key: str) -> dict | list:
+    async def get(self, key: str) -> Optional[dict | list]:
         cached = await self.cache.get(str(key))
         result = orjson.loads(cached)
-        return result
+        if result:
+            return result
+        return None  # <- mypy!!!
 
     async def set(self, name: str, value: str) -> None:
         await self.cache.set(name, value, ex=self.ttl)

@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from aioredis import Redis
+from redis.asyncio import Redis
 from celery import Celery  # type: ignore
 from punq import Container, Scope  # type: ignore
 

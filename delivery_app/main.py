@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
-import aioredis
+import redis.asyncio
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from middleware import SessionIDMiddleware
@@ -26,7 +26,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 async def create_app() -> FastAPI:
     config = get_config()
-    db.cache.redis_client.redis = await aioredis.from_url(config.REDIS_URL, decode_responses=True)
+    db.cache.redis_client.redis = await redis.asyncio.from_url(
+        config.REDIS_URL, decode_responses=True
+    )
     app = FastAPI(
         title="Delivery Service",
         version="1.0.0",
