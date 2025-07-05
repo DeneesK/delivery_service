@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
-import redis.asyncio
+from redis.asyncio import Redis
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from middleware import SessionIDMiddleware
@@ -9,26 +9,26 @@ from starlette.middleware.sessions import SessionMiddleware
 
 import db.cache.redis_client
 from api.v1 import main_router as v1_router
-from core.conf import Settings, get_config
+from core.conf import get_config
 from core.di_container import init_container
 from db.db import AsyncSessionFactory
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    config = get_config()
+    db.cache.redis_client.redis = await Redis.from_url(config.REDIS_URL, decode_responses=True)
     container = init_container()
-    config: Settings = container.resolve(Settings)
     app.description = config.DESCRIPTION
     yield
     session_factory: AsyncSessionFactory = container.resolve(AsyncSessionFactory)
+    redis: Redis = container.resolve(Redis)
+    await redis.close()
     await session_factory.close_all()
 
 
-async def create_app() -> FastAPI:
+def create_app() -> FastAPI:
     config = get_config()
-    db.cache.redis_client.redis = await redis.asyncio.from_url(
-        config.REDIS_URL, decode_responses=True
-    )
     app = FastAPI(
         title="Delivery Service",
         version="1.0.0",

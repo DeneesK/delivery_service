@@ -4,7 +4,7 @@ from redis.asyncio import Redis
 from celery import Celery  # type: ignore
 from punq import Container, Scope  # type: ignore
 
-from core.conf import Settings
+from core.conf import Settings, get_config
 from db.db import AsyncSessionFactory
 from services.parcel import ParcelService, get_parcel_service
 from task_producer.producer import get_client
@@ -19,7 +19,7 @@ def init_container() -> Container:
 
 def _init_container() -> Container:
     container = Container()
-    container.register(Settings, instance=Settings(), scope=Scope.singleton)  # type: ignore
+    container.register(Settings, factory=get_config, scope=Scope.singleton)  # type: ignore
     config: Settings = container.resolve(Settings)  # type: ignore
 
     container.register(

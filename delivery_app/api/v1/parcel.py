@@ -41,6 +41,7 @@ async def new_parcel(
     container: Container = Depends(init_container),
 ) -> ParcelID:
     try:
+        print(request.session)
         owner: str = request.session["session_id"]
         parcel_service: ParcelService = container.resolve(ParcelService)
         parcel_id = await parcel_service.new_parcel(
