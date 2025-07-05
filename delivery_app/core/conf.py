@@ -6,6 +6,12 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
     DATABASE_URL: MySQLDsn
     BROKER_URL: str
+    REDIS_URL: str
     SECRET_KEY: str
     DESCRIPTION: str
+    TTl: int
     IS_DEV_MODE: bool = True
+
+
+def get_config() -> Settings:
+    return Settings()  # type: ignore

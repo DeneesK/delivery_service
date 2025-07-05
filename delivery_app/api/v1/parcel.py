@@ -15,6 +15,7 @@ from api.v1.schemas import (
 )
 from core.di_container import init_container
 from services.parcel import ParcelService
+from services.cache import CacheService
 
 logger = logging.getLogger("app")
 router = APIRouter(prefix="/parcels", tags=["Parcel"])
@@ -67,9 +68,16 @@ async def parcel_types(
     container: Container = Depends(init_container),
 ) -> ParcelTypes:
     try:
-        parcel_service: ParcelService = container.resolve(ParcelService)
-        result = await parcel_service.parcel_types()
+        cache: CacheService = container.resolve(CacheService)
+        parcel_type_key = "parcel_types"
+        cached = await cache.get(parcel_type_key)
+        if cached:
+            result = cached
+        else:
+            parcel_service: ParcelService = container.resolve(ParcelService)
+            result = await parcel_service.parcel_types()
         p_types = ParcelTypes(parcel_types=[ParcelType.model_validate(pt) for pt in result])
+        await cache.set(parcel_type_key, p_types.model_dump_json())
         return p_types
     except Exception as e:
         logger.error("Error creating parcel: %s", e, exc_info=True)
@@ -100,19 +108,28 @@ async def get_parcels(
 ) -> Parcels:
     try:
         owner: str = request.session["session_id"]
-        parcel_service: ParcelService = container.resolve(ParcelService)
+        key = f"{owner}-{parcel_type}-{has_delivery_cost}-{limit}-{offset}"
+        cache: CacheService = container.resolve(CacheService)
+        cached = await cache.get(key)
 
-        result = await parcel_service.get_all_parcels(
-            owner=owner,
-            parcel_type=parcel_type,
-            has_delivery_cost=has_delivery_cost,
-            limit=limit,
-            offset=offset,
-        )
+        if cached:
+            result = cached
+        else:
+            parcel_service: ParcelService = container.resolve(ParcelService)
+
+            result = await parcel_service.get_all_parcels(
+                owner=owner,
+                parcel_type=parcel_type,
+                has_delivery_cost=has_delivery_cost,
+                limit=limit,
+                offset=offset,
+            )
 
         if result:
             parcels = Parcels(parcels=[ParcelOut.model_validate(p) for p in result])
+            await cache.set(key, parcels.model_dump_json())
             return parcels
+
         return Parcels(parcels=[None])
     except HTTPException as e:
         raise e
@@ -141,8 +158,15 @@ async def get_parcel_by_id(
     container: Container = Depends(init_container),
 ) -> ParcelOut:
     try:
-        parcel_service: ParcelService = container.resolve(ParcelService)
-        result = await parcel_service.get_by_id(parcel_id=parcel_id)
+        cache: CacheService = container.resolve(CacheService)
+        cached = await cache.get(parcel_id)
+
+        if cached:
+            result = cached
+        else:
+            parcel_service: ParcelService = container.resolve(ParcelService)
+            result = await parcel_service.get_by_id(parcel_id=parcel_id)  # type: ignore
+
         if not result:
             logger.info("Parcel %s not found", parcel_id)
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Parcel not found")

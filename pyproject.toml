@@ -24,6 +24,7 @@ itsdangerous = "^2.2.0"
 celery = "^5.5.3"
 kombu = "^5.5.4"
 aiohttp = "^3.12.13"
+aioredis = "^2.0.1"
 
 
 [tool.poetry.group.dev.dependencies]
