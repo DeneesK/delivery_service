@@ -126,7 +126,7 @@ async def get_parcels(
 
 @router.get(
     "/{parcel_id}",
-    description="Get parcel by id",
+    description="Get parcel by parcel id",
     responses={
         status.HTTP_200_OK: {"description": "Successful retrieval of parcels", "model": Parcels},
         status.HTTP_404_NOT_FOUND: {"description": "Parcel not found"},
@@ -152,7 +152,7 @@ async def get_parcel_by_id(
 
 @router.post(
     "/{parcel_id}/assign-company",
-    description="Assign parcel to a delivery company atomically",
+    description="Assign parcel to a delivery company",
     response_model=CompanyAssigned,
     status_code=status.HTTP_200_OK,
     responses={
