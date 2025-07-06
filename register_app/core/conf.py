@@ -9,6 +9,9 @@ class Settings(BaseSettings):
     REDIS_URL: str
     CELERY_BACKEND: str
     CURRENCY_RATE_URL: str
+    MONGO_URL: str
+    MONGO_DB: str
+    MONGO_COLLECTION: str
     IS_DEV_MODE: bool = True
 
 

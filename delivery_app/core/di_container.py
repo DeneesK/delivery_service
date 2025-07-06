@@ -3,13 +3,16 @@ from functools import lru_cache
 from redis.asyncio import Redis
 from celery import Celery  # type: ignore
 from punq import Container, Scope  # type: ignore
+from motor.motor_asyncio import AsyncIOMotorClient
 
 from core.conf import Settings, get_config
 from db.db import AsyncSessionFactory
 from services.parcel import ParcelService, get_parcel_service
 from task_producer.producer import get_client
 from db.cache.redis_client import get_redis
+from db.log_db.mongo_db import get_mongo_client
 from services.cache import CacheService, get_cache_service
+from delivery_app.services.statistics import StatisticsService, get_static_service
 
 
 @lru_cache(1)
@@ -52,6 +55,20 @@ def _init_container() -> Container:
     container.register(
         CacheService,
         instance=get_cache_service(cache_client, config.TTl),
+        scope=Scope.singleton,
+    )
+
+    container.register(
+        AsyncIOMotorClient,
+        instance=get_mongo_client(config.MONGO_URL),
+        scope=Scope.singleton,
+    )
+
+    mongo_client = container.resolve(AsyncIOMotorClient)
+
+    container.register(
+        StatisticsService,
+        instance=get_static_service(mongo_client, config.MONGO_DB, config.MONGO_COLLECTION),
         scope=Scope.singleton,
     )
 

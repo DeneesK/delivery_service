@@ -9,7 +9,10 @@ class Settings(BaseSettings):
     REDIS_URL: str
     SECRET_KEY: str
     DESCRIPTION: str
+    MONGO_URL: str
     TTl: int
+    MONGO_DB: str
+    MONGO_COLLECTION: str
     IS_DEV_MODE: bool = True
 
 

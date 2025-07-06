@@ -63,6 +63,10 @@ async def new_parcel(
     "/types",
     description="Get all types of parcels",
     response_model=ParcelTypes,
+    responses={
+        status.HTTP_200_OK: {"description": "Successful retrieval of types", "model": ParcelTypes},
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error"},
+    },
 )
 async def parcel_types(
     container: Container = Depends(init_container),
@@ -113,8 +117,7 @@ async def get_parcels(
         cached = await cache.get(key)
 
         if cached:
-            result = cached
-            parcels = Parcels(parcels=[ParcelOut.model_validate(p) for p in result])
+            parcels = Parcels(parcels=[ParcelOut.model_validate(p) for p in cached])
         else:
             parcel_service: ParcelService = container.resolve(ParcelService)
 

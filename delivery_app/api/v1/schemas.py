@@ -48,3 +48,13 @@ class ParcelType(BaseSchema):
 
 class ParcelTypes(BaseSchema):
     parcel_types: list[ParcelType]
+
+
+class StatisticsOut(BaseSchema):
+    date: str
+    parcel_type: str
+    total_cost: float
+
+
+class DailyStatisticsResponse(BaseModel):
+    data: list[StatisticsOut]

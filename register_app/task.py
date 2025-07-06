@@ -1,10 +1,12 @@
 import logging
 
+from sqlalchemy.orm import Session
+
 from celery_app import app
 from register_app.utils.currency_rate import get_usd_to_rub
 from db.db import SessionLocal
 from db.models.parcel import Parcel
-from sqlalchemy.orm import Session
+from utils.cost_log import insert_log
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +22,8 @@ def register_parcel_task(parcel_data: dict):
         weight = parcel_data["weight"]
         content_value_usd = parcel_data["content_value_usd"]
         delivery_cost_rub = round((weight * 0.5 + content_value_usd * 0.01) * usd_rate, 2)
+
+        insert_log(parcel_data, delivery_cost_rub)
 
         parcel = Parcel(
             parcel_id=parcel_data["parcel_id"],

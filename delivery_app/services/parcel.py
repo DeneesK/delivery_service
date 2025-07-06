@@ -8,6 +8,7 @@ from sqlalchemy import select
 from db.db import AsyncSessionFactory
 from db.models.parcel import Parcel, ParcelType
 from services.common import DBObjectService
+from dto.parcel_dto import ParcelDTO, ParcelsDTO, ParcelTypesDTO
 
 
 class ParcelService(DBObjectService):
@@ -33,17 +34,17 @@ class ParcelService(DBObjectService):
         )
         return parcel_id
 
-    async def get_by_id(self, parcel_id: str) -> Parcel | None:
+    async def get_by_id(self, parcel_id: str) -> ParcelDTO | None:
         """Get parcel by parcel_id"""
         async with self.session_maker() as session:
             parcel = await session.get(Parcel, parcel_id)
-        return parcel
+        return ParcelDTO.model_validate(parcel)
 
-    async def parcel_types(self) -> list[ParcelType]:
+    async def parcel_types(self) -> ParcelTypesDTO:
         """Get all parcel's types - name and id"""
         async with self.session_maker() as session:
             result = await session.execute(select(ParcelType))
-            return list(result.scalars().all())
+            return ParcelTypesDTO.model_validate(list(result.scalars().all()))
 
     async def get_all_parcels(
         self,
@@ -52,7 +53,7 @@ class ParcelService(DBObjectService):
         has_delivery_cost: bool,
         limit: int = 100,
         offset: int = 0,
-    ) -> list[Parcel | None]:
+    ) -> ParcelsDTO:
         """Get all parcels by owner, optionally filtered"""
         async with self.session_maker() as session:
             stmt = select(Parcel).where(Parcel.owner == owner)
@@ -68,7 +69,7 @@ class ParcelService(DBObjectService):
             stmt = stmt.offset(offset).limit(limit)
 
             result = await session.execute(stmt)
-            return list(result.scalars().all())
+            return ParcelsDTO.model_validate(list(result.scalars().all()))
 
 
 def get_parcel_service(session_maker: AsyncSessionFactory, task_client: Celery) -> ParcelService:
