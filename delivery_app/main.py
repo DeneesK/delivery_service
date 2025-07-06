@@ -12,14 +12,17 @@ from api.v1 import main_router as v1_router
 from core.conf import get_config
 from core.di_container import init_container
 from db.db import AsyncSessionFactory
+from services.statistics import StatisticsService
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     config = get_config()
+    app.description = config.DESCRIPTION
     db.cache.redis_client.redis = await Redis.from_url(config.REDIS_URL, decode_responses=True)
     container = init_container()
-    app.description = config.DESCRIPTION
+    statistics_service: StatisticsService = container.resolve(StatisticsService)
+    await statistics_service.ensure_indexes()
     yield
     session_factory: AsyncSessionFactory = container.resolve(AsyncSessionFactory)
     redis: Redis = container.resolve(Redis)

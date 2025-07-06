@@ -3,7 +3,7 @@ from typing import Optional
 
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from dto.statics_dto import DailyStatisticsDTO
+from dto.statics_dto import DailyStatisticsDTO, StatisticsOut
 
 
 class StatisticsService:
@@ -11,11 +11,13 @@ class StatisticsService:
         self.collection = client[db_name][collection]
 
     async def ensure_indexes(self):
+        """creating indexes"""
         await self.collection.create_index([("timestamp", 1), ("parcel_type", 1)])
 
     async def get_daily_costs(
         self, date: datetime, parcel_type: Optional[str] = None
     ) -> DailyStatisticsDTO:
+        """calculation of the sum of the delivery costs of all parcels by type per day"""
         start = datetime(date.year, date.month, date.day)
         end = start + timedelta(days=1)
 
@@ -44,7 +46,7 @@ class StatisticsService:
 
         result = await self.collection.aggregate(pipeline).to_list(length=None)  # type: ignore
 
-        return DailyStatisticsDTO.model_validate(result)
+        return DailyStatisticsDTO(data=[StatisticsOut.model_validate(s) for s in result])
 
 
 def get_static_service(

@@ -9,11 +9,13 @@ sys.path.insert(0, BASE_DIR)
 
 import pytest  # noqa
 from fastapi import FastAPI  # noqa
+from motor.motor_asyncio import AsyncIOMotorClient  # noqa
 from fastapi.testclient import TestClient  # noqa
 from unittest.mock import AsyncMock, MagicMock  # noqa
 
 from delivery_app.services.parcel import ParcelService  # noqa
 from delivery_app.services.cache import CacheService  # noqa
+from delivery_app.services.statistics import StatisticsService  # noqa
 
 
 @pytest.fixture
@@ -79,3 +81,30 @@ def redis_mock():
 @pytest.fixture
 def cache_service(redis_mock):
     return CacheService(cache_client=redis_mock, ttl=60)
+
+
+@pytest.fixture
+def mock_mongo_collection():
+    mock_collection = MagicMock()
+
+    aggregate_mock = MagicMock()
+    aggregate_mock.to_list = AsyncMock(return_value=[])
+
+    mock_collection.aggregate.return_value = aggregate_mock
+    return mock_collection
+
+
+@pytest.fixture
+def mock_mongo_client(mock_mongo_collection):
+    mock_client = MagicMock(spec=AsyncIOMotorClient)
+    mock_client.__getitem__.return_value.__getitem__.return_value = mock_mongo_collection
+    return mock_client
+
+
+@pytest.fixture
+def statistics_service(mock_mongo_client):
+    return StatisticsService(
+        client=mock_mongo_client,
+        db_name="test_db",
+        collection="test_cost",
+    )
