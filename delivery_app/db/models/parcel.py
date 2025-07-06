@@ -26,4 +26,7 @@ class Parcel(Base):
         ForeignKey("parceltype.name"),
         nullable=False,
     )
+    company_id: Mapped[int | None] = mapped_column(ForeignKey("companies.id"), nullable=True)
+
+    company = relationship("Company", back_populates="parcels")
     parceltype: Mapped["ParcelType"] = relationship(back_populates="parcels")

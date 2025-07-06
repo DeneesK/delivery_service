@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional, Union
 
-from pydantic import BaseModel, ConfigDict, field_serializer
+from pydantic import BaseModel, ConfigDict, field_serializer, Field
 
 
 class ParcelTypeEnum(str, Enum):
@@ -56,5 +56,14 @@ class StatisticsOut(BaseSchema):
     total_cost: float
 
 
-class DailyStatisticsResponse(BaseModel):
+class DailyStatisticsResponse(BaseSchema):
     data: list[StatisticsOut]
+
+
+class CompanyAssigned(BaseSchema):
+    parcel_id: str
+    company_id: int
+
+
+class CompanyAssignRequest(BaseSchema):
+    company_id: int = Field(..., gt=0)

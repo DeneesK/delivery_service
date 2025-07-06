@@ -11,10 +11,13 @@ from api.v1.schemas import (
     ParcelOut,
     Parcels,
     ParcelTypes,
+    CompanyAssigned,
+    CompanyAssignRequest,
 )
 from core.di_container import init_container
 from services.parcel import ParcelService
 from services.cache import CacheService
+from services.company import CompanyService
 
 logger = logging.getLogger("app")
 router = APIRouter(prefix="/parcels", tags=["Parcel"])
@@ -179,6 +182,44 @@ async def get_parcel_by_id(
         raise e
     except Exception as e:
         logger.error("Error creating parcel: : %s", e, exc_info=True)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error"
+        )
+
+
+@router.post(
+    "/{parcel_id}/assign-company",
+    description="Assign parcel to a delivery company atomically",
+    response_model=CompanyAssigned,
+    status_code=status.HTTP_200_OK,
+    responses={
+        status.HTTP_200_OK: {"description": "Parcel successfully assigned to company"},
+        status.HTTP_404_NOT_FOUND: {"description": "Parcel or company not found"},
+        status.HTTP_409_CONFLICT: {"description": "Parcel already assigned"},
+        status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Internal server error"},
+    },
+)
+async def assign_company_to_parcel(
+    parcel_id: str,
+    body: CompanyAssignRequest,
+    container: Container = Depends(init_container),
+):
+    try:
+        parcel_service: CompanyService = container.resolve(CompanyService)
+
+        success = await parcel_service.assign_to_company(parcel_id, body.company_id)
+        if not success:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Parcel already assigned to a company",
+            )
+
+        return CompanyAssigned(parcel_id=parcel_id, company_id=body.company_id)
+    except ValueError as ve:
+        logger.error("Company or parcel not found: %s", ve)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(ve))
+    except Exception as e:
+        logger.error("Error assigning company to parcel: %s", e, exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error"
         )
