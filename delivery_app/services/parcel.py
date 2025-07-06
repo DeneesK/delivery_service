@@ -9,6 +9,7 @@ from db.db import AsyncSessionFactory
 from db.models.parcel import Parcel, ParcelType
 from services.common import DBObjectService
 from dto.parcel_dto import ParcelDTO, ParcelsDTO, ParcelTypesDTO, ParcelTypeDTO
+from core.exceptions import NotFoundError
 
 
 class ParcelService(DBObjectService):
@@ -40,13 +41,13 @@ class ParcelService(DBObjectService):
         )
         return parcel_id
 
-    async def get_by_id(self, parcel_id: str) -> ParcelDTO | None:
+    async def get_by_id(self, parcel_id: str) -> ParcelDTO:
         """Get parcel by parcel_id"""
         async with self.session_maker() as session:
             parcel = await session.get(Parcel, parcel_id)
             if parcel:
                 return ParcelDTO.model_validate(parcel)
-            return None
+            raise NotFoundError
 
     async def parcel_types(self) -> ParcelTypesDTO:
         """Get all parcel's types - name and id"""

@@ -19,6 +19,7 @@ from core.di_container import init_container
 from services.parcel import ParcelService
 from services.cache import CacheService
 from services.company import CompanyService
+from core.exceptions import UnauthorizedError
 
 logger = logging.getLogger("app")
 router = APIRouter(prefix="/parcels", tags=["Parcel"])
@@ -43,23 +44,16 @@ async def new_parcel(
     new_parcel: NewParcel,
     container: Container = Depends(init_container),
 ) -> ParcelID:
-    try:
-        owner: str = request.session["session_id"]
-        parcel_service: ParcelService = container.resolve(ParcelService)
-        parcel_id = await parcel_service.new_parcel(
-            **new_parcel.model_dump(exclude={"parcel_type"}),
-            parcel_type=new_parcel.parcel_type.value,
-            owner=owner,
-        )
-        return ParcelID(parcel_id=parcel_id)
-    except KeyError:
-        logger.error("Unauthorized access attempt to create parcel")
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
-    except Exception as e:
-        logger.error("Error creating parcel: %s", e, exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error"
-        )
+    owner: str | None = request.session.get("session_id")
+    if not owner:
+        raise UnauthorizedError
+    parcel_service: ParcelService = container.resolve(ParcelService)
+    parcel_id = await parcel_service.new_parcel(
+        **new_parcel.model_dump(exclude={"parcel_type"}),
+        parcel_type=new_parcel.parcel_type.value,
+        owner=owner,
+    )
+    return ParcelID(parcel_id=parcel_id)
 
 
 @router.get(
@@ -74,23 +68,17 @@ async def new_parcel(
 async def parcel_types(
     container: Container = Depends(init_container),
 ) -> ParcelTypes:
-    try:
-        cache: CacheService = container.resolve(CacheService)
-        parcel_type_key = "parcel_types"
-        cached = await cache.get(parcel_type_key)
-        if cached:
-            p_types = ParcelTypes.model_validate(cached)
-        else:
-            parcel_service: ParcelService = container.resolve(ParcelService)
-            result = await parcel_service.parcel_types()
-            p_types = ParcelTypes.model_validate(result)
-            await cache.set(parcel_type_key, p_types.model_dump_json())
-        return p_types
-    except Exception as e:
-        logger.error("Error creating parcel: %s", e, exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error"
-        )
+    cache: CacheService = container.resolve(CacheService)
+    parcel_type_key = "parcel_types"
+    cached = await cache.get(parcel_type_key)
+    if cached:
+        p_types = ParcelTypes.model_validate(cached)
+    else:
+        parcel_service: ParcelService = container.resolve(ParcelService)
+        result = await parcel_service.parcel_types()
+        p_types = ParcelTypes.model_validate(result)
+        await cache.set(parcel_type_key, p_types.model_dump_json())
+    return p_types
 
 
 @router.get(
@@ -113,38 +101,27 @@ async def get_parcels(
     limit: int = Query(100, ge=1, description="Limit number of results"),
     offset: int = Query(0, ge=0, description="Number of results to skip"),
 ) -> Parcels:
-    try:
-        owner: str = request.session["session_id"]
-        key = f"{owner}-{parcel_type}-{has_delivery_cost}-{limit}-{offset}"
-        cache: CacheService = container.resolve(CacheService)
-        cached = await cache.get(key)
+    owner: str = request.session["session_id"]
+    key = f"{owner}-{parcel_type}-{has_delivery_cost}-{limit}-{offset}"
+    cache: CacheService = container.resolve(CacheService)
+    cached = await cache.get(key)
 
-        if cached:
-            parcels = Parcels.model_validate(cached)
-        else:
-            parcel_service: ParcelService = container.resolve(ParcelService)
+    if cached:
+        parcels = Parcels.model_validate(cached)
+    else:
+        parcel_service: ParcelService = container.resolve(ParcelService)
 
-            result = await parcel_service.get_all_parcels(
-                owner=owner,
-                parcel_type=parcel_type,
-                has_delivery_cost=has_delivery_cost,
-                limit=limit,
-                offset=offset,
-            )
-            parcels = Parcels(parcels=[ParcelOut.model_validate(p) for p in result.parcels])
-            await cache.set(key, parcels.model_dump_json())
-
-        return parcels
-    except HTTPException as e:
-        raise e
-    except KeyError:
-        logger.error("Unauthorized access attempt to create parcel")
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
-    except Exception as e:
-        logger.error("Error creating parcel: %s", e, exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error"
+        result = await parcel_service.get_all_parcels(
+            owner=owner,
+            parcel_type=parcel_type,
+            has_delivery_cost=has_delivery_cost,
+            limit=limit,
+            offset=offset,
         )
+        parcels = Parcels(parcels=[ParcelOut.model_validate(p) for p in result.parcels])
+        await cache.set(key, parcels.model_dump_json())
+
+    return parcels
 
 
 @router.get(
@@ -161,31 +138,16 @@ async def get_parcel_by_id(
     parcel_id: str,
     container: Container = Depends(init_container),
 ) -> ParcelOut:
-    try:
-        cache: CacheService = container.resolve(CacheService)
-        cached = await cache.get(parcel_id)
-        if cached:
-            parcel = ParcelOut.model_validate(cached)
-        else:
-            parcel_service: ParcelService = container.resolve(ParcelService)
-            result = await parcel_service.get_by_id(parcel_id=parcel_id)  # type: ignore
-
-            if not result:
-                logger.warning("Parcel %s not found", parcel_id)
-                raise HTTPException(
-                    status_code=status.HTTP_404_NOT_FOUND, detail="Parcel not found"
-                )
-            parcel = ParcelOut.model_validate(result)
-            await cache.set(parcel_id, parcel.model_dump_json())
-
-        return parcel
-    except HTTPException as e:
-        raise e
-    except Exception as e:
-        logger.error("Error creating parcel: : %s", e, exc_info=True)
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error"
-        )
+    cache: CacheService = container.resolve(CacheService)
+    cached = await cache.get(parcel_id)
+    if cached:
+        parcel = ParcelOut.model_validate(cached)
+    else:
+        parcel_service: ParcelService = container.resolve(ParcelService)
+        result = await parcel_service.get_by_id(parcel_id=parcel_id)  # type: ignore
+        parcel = ParcelOut.model_validate(result)
+        await cache.set(parcel_id, parcel.model_dump_json())
+    return parcel
 
 
 @router.post(
@@ -205,22 +167,13 @@ async def assign_company_to_parcel(
     body: CompanyAssignRequest,
     container: Container = Depends(init_container),
 ):
-    try:
-        parcel_service: CompanyService = container.resolve(CompanyService)
+    parcel_service: CompanyService = container.resolve(CompanyService)
 
-        success = await parcel_service.assign_to_company(parcel_id, body.company_id)
-        if not success:
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail="Parcel already assigned to a company",
-            )
-
-        return CompanyAssigned(parcel_id=parcel_id, company_id=body.company_id)
-    except ValueError as ve:
-        logger.error("Company or parcel not found: %s", ve)
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(ve))
-    except Exception as e:
-        logger.error("Error assigning company to parcel: %s", e, exc_info=True)
+    success = await parcel_service.assign_to_company(parcel_id, body.company_id)
+    if not success:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error"
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Parcel already assigned to a company",
         )
+
+    return CompanyAssigned(parcel_id=parcel_id, company_id=body.company_id)

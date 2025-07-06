@@ -13,6 +13,14 @@ from core.conf import get_config
 from core.di_container import init_container
 from db.db import AsyncSessionFactory
 from services.statistics import StatisticsService
+from core.exceptions import NotFoundError, UnauthorizedError, AlreadyAssignedError
+from exeption_handlers import (
+    not_found_exception_handler,
+    validation_exception_handler,
+    unauthorized_exception_handler,
+    generic_exception_handler,
+    already_assigned_exception_handler,
+)
 
 
 @asynccontextmanager
@@ -42,5 +50,12 @@ def create_app() -> FastAPI:
     )
     app.add_middleware(SessionIDMiddleware)
     app.add_middleware(SessionMiddleware, secret_key=config.SECRET_KEY)
+    app.add_exception_handler(NotFoundError, not_found_exception_handler)  # type: ignore
+    app.add_exception_handler(ValueError, validation_exception_handler)  # type: ignore
+    app.add_exception_handler(UnauthorizedError, unauthorized_exception_handler)  # type: ignore
+    app.add_exception_handler(Exception, generic_exception_handler)
+    app.add_exception_handler(
+        AlreadyAssignedError, already_assigned_exception_handler
+    )  # type: ignore
     app.include_router(v1_router)
     return app
