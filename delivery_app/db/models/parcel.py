@@ -4,6 +4,7 @@ from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db.models.base import Base
+from db.models.company import Company  # noqa
 
 
 class ParcelType(Base):

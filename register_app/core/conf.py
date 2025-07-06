@@ -13,3 +13,6 @@ class Settings(BaseSettings):
     MONGO_DB: str
     MONGO_COLLECTION: str
     IS_DEV_MODE: bool = True
+
+
+config = Settings()  # type: ignore

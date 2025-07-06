@@ -44,7 +44,6 @@ def register_parcel_task(parcel_data: dict):
             delivery_cost_rub=delivery_cost_rub,
             owner=parcel_data["owner"],
         )
-
         session.add(parcel)
         session.commit()
         logger.info("Task finished, from %s", parcel_data["owner"])
