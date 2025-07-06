@@ -138,7 +138,7 @@ async def get_parcels(
     except HTTPException as e:
         raise e
     except KeyError:
-        logger.info("Unauthorized access attempt to create parcel")
+        logger.error("Unauthorized access attempt to create parcel")
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
     except Exception as e:
         logger.error("Error creating parcel: %s", e, exc_info=True)
@@ -171,7 +171,7 @@ async def get_parcel_by_id(
             result = await parcel_service.get_by_id(parcel_id=parcel_id)  # type: ignore
 
             if not result:
-                logger.info("Parcel %s not found", parcel_id)
+                logger.warning("Parcel %s not found", parcel_id)
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail="Parcel not found"
                 )
