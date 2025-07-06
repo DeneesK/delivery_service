@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from db.mongo_db import mongo_collection
+from pymongo.collection import Collection
 
 
-def insert_log(parcel_data: dict, cost: float) -> None:
+def insert_log(mongo_collection: Collection, parcel_data: dict, cost: float) -> None:
     mongo_collection.insert_one(
         {
             "timestamp": datetime.utcnow(),

@@ -1,7 +1,7 @@
 from pymongo import MongoClient
+from pymongo.collection import Collection
 
-from core.conf import config
 
-
-mongo_client: MongoClient = MongoClient(config.MONGO_URL)  # type: ignore
-mongo_collection = mongo_client[config.MONGO_DB][config.MONGO_COLLECTION]
+def get_mongo_collection(url: str, dbname: str, collectionname: str) -> Collection:
+    mongo_client: MongoClient = MongoClient(url)  # type: ignore
+    return mongo_client[dbname][collectionname]
