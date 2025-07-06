@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 @app.task(name="consumer.tasks.register_parcel_task", acks_late=True)
 def register_parcel_task(parcel_data: dict):
-    """save new parcel to db and calculate delivery cost"""
+    """save new parcel to db with calculated delivery cost"""
     try:
         container = init_container()
 
