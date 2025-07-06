@@ -28,9 +28,6 @@ services:
       - "8000:8000"
   rabbitmq:
     image: rabbitmq:3-management
-    ports:
-      - "5672:5672"
-      - "15672:15672"
   cache:
     image: redis:alpine
     restart: always
@@ -40,8 +37,6 @@ services:
     build:
       context: ./
       dockerfile: register_app/Dockerfile
-    depends_on:
-      - delivery_app
     command: [ "make", "start_app" ]
   mongo:
     image: mongo:7
