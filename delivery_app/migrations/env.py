@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from db.models.base import Base  # type: ignore
 from db.models.parcel import Parcel, ParcelType  # type: ignore
+from db.models.company import Company  # type: ignore
 
 load_dotenv()
 
@@ -69,6 +70,7 @@ async def run_migrations_online():
     connectable = create_async_engine(url, poolclass=pool.NullPool)
 
     async with connectable.connect() as async_conn:
+
         def do_migrations(sync_conn):
             context.configure(
                 connection=sync_conn,
