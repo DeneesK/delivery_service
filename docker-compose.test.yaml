@@ -33,6 +33,7 @@ services:
     environment:
       DATABASE_URL: mysql+aiomysql://user:password@mysql-db-test:3306/mydb
       BROKER_URL: amqp://guest:guest@test-rabbitmq:5672//
+      REDIS_URL: redis://cache-test:6379/0
       MONGO_URL: mongodb://mongo-test:27017
       SECRET_KEY: supersecret
       DESCRIPTION: "Test environment"
@@ -67,10 +68,8 @@ services:
       - cache-test:/var/lib/redis/data
   mongo-test:
     image: mongo:7
-    container_name: delivery_mongo
+    container_name: delivery_mongo_test
     restart: always
-    ports:
-      - "27018:27017"
     volumes:
       - mongo_data-test:/data/db
 volumes:

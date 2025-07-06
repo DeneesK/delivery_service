@@ -9,10 +9,10 @@ class CacheService:
         self.cache = cache_client
         self.ttl = ttl
 
-    async def get(self, key: str) -> Optional[dict | list]:
+    async def get(self, key: str) -> Optional[dict]:
         cached = await self.cache.get(str(key))
-        result = orjson.loads(cached)
-        if result:
+        if cached:
+            result = orjson.loads(cached)
             return result
         return None  # <- mypy!!!
 

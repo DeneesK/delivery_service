@@ -10,7 +10,6 @@ from api.v1.schemas import (
     ParcelID,
     ParcelOut,
     Parcels,
-    ParcelType,
     ParcelTypes,
 )
 from core.di_container import init_container
@@ -76,11 +75,11 @@ async def parcel_types(
         parcel_type_key = "parcel_types"
         cached = await cache.get(parcel_type_key)
         if cached:
-            p_types = ParcelTypes(parcel_types=[ParcelType.model_validate(pt) for pt in cached])
+            p_types = ParcelTypes.model_validate(cached)
         else:
             parcel_service: ParcelService = container.resolve(ParcelService)
             result = await parcel_service.parcel_types()
-            p_types = ParcelTypes(parcel_types=[ParcelType.model_validate(pt) for pt in result])
+            p_types = ParcelTypes.model_validate(result)
             await cache.set(parcel_type_key, p_types.model_dump_json())
         return p_types
     except Exception as e:
@@ -117,7 +116,7 @@ async def get_parcels(
         cached = await cache.get(key)
 
         if cached:
-            parcels = Parcels(parcels=[ParcelOut.model_validate(p) for p in cached])
+            parcels = Parcels.model_validate(cached)
         else:
             parcel_service: ParcelService = container.resolve(ParcelService)
 
@@ -128,7 +127,7 @@ async def get_parcels(
                 limit=limit,
                 offset=offset,
             )
-            parcels = Parcels(parcels=[ParcelOut.model_validate(p) for p in result])
+            parcels = Parcels(parcels=[ParcelOut.model_validate(p) for p in result.parcels])
             await cache.set(key, parcels.model_dump_json())
 
         return parcels

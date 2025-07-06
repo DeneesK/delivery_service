@@ -3,7 +3,7 @@ import logging
 from sqlalchemy.orm import Session
 
 from celery_app import app
-from register_app.utils.currency_rate import get_usd_to_rub
+from utils.currency_rate import get_usd_to_rub
 from db.db import SessionLocal
 from db.models.parcel import Parcel
 from utils.cost_log import insert_log

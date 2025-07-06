@@ -5,8 +5,8 @@ from fastapi import APIRouter, Query, Depends, HTTPException, status
 from punq import Container  # type: ignore
 
 from core.di_container import init_container
-from api.v1.schemas import DailyStatisticsResponse, ParcelTypeEnum
-from delivery_app.services.statistics import StatisticsService
+from api.v1.schemas import DailyStatisticsResponse, ParcelTypeEnum, StatisticsOut
+from services.statistics import StatisticsService
 from services.cache import CacheService
 
 
@@ -16,9 +16,9 @@ logger = logging.getLogger("app")
 
 
 @router.get(
-    "/statistics/daily",
+    "/",
     response_model=DailyStatisticsResponse,
-    dependencies="calculation of the sum of the delivery costs of all parcels by type per day",
+    description="calculation of the sum of the delivery costs of all parcels by type per day",
     responses={
         status.HTTP_200_OK: {
             "description": "Successful retrieval of costs of all parcels by type per day",
@@ -41,7 +41,9 @@ async def get_statistics(
         else:
             parcel_service: StatisticsService = container.resolve(StatisticsService)
             result = await parcel_service.get_daily_costs(date, parcel_type)
-            static = DailyStatisticsResponse.model_validate(result)
+            static = DailyStatisticsResponse(
+                data=[StatisticsOut.model_validate(s) for s in result.data]
+            )
             await cache.set(key, static.model_dump_json())
         return static
     except Exception as e:

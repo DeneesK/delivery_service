@@ -8,7 +8,7 @@ from sqlalchemy import select
 from db.db import AsyncSessionFactory
 from db.models.parcel import Parcel, ParcelType
 from services.common import DBObjectService
-from dto.parcel_dto import ParcelDTO, ParcelsDTO, ParcelTypesDTO
+from dto.parcel_dto import ParcelDTO, ParcelsDTO, ParcelTypesDTO, ParcelTypeDTO
 
 
 class ParcelService(DBObjectService):
@@ -38,13 +38,16 @@ class ParcelService(DBObjectService):
         """Get parcel by parcel_id"""
         async with self.session_maker() as session:
             parcel = await session.get(Parcel, parcel_id)
-        return ParcelDTO.model_validate(parcel)
+            if parcel:
+                return ParcelDTO.model_validate(parcel)
+            return None
 
     async def parcel_types(self) -> ParcelTypesDTO:
         """Get all parcel's types - name and id"""
         async with self.session_maker() as session:
             result = await session.execute(select(ParcelType))
-            return ParcelTypesDTO.model_validate(list(result.scalars().all()))
+            _types = result.scalars().all()
+            return ParcelTypesDTO(parcel_types=[ParcelTypeDTO.model_validate(t) for t in _types])
 
     async def get_all_parcels(
         self,
@@ -69,7 +72,7 @@ class ParcelService(DBObjectService):
             stmt = stmt.offset(offset).limit(limit)
 
             result = await session.execute(stmt)
-            return ParcelsDTO.model_validate(list(result.scalars().all()))
+            return ParcelsDTO(parcels=[ParcelDTO.model_validate(p) for p in result.scalars().all()])
 
 
 def get_parcel_service(session_maker: AsyncSessionFactory, task_client: Celery) -> ParcelService:
