@@ -6,6 +6,7 @@ from db.db import AsyncSessionFactory
 
 
 class CompanyService(DBObjectService):
+    """Service for assigning parcel to company"""
 
     async def assign_to_company(self, parcel_id: str, company_id: int) -> bool:
         """Try to assign parcel to a delivery company atomically"""

@@ -12,6 +12,12 @@ from dto.parcel_dto import ParcelDTO, ParcelsDTO, ParcelTypesDTO, ParcelTypeDTO
 
 
 class ParcelService(DBObjectService):
+    """
+    Service for working with parcels.
+
+    Methods allow you to create, receive and update parcel data in the database.
+    """
+
     def __init__(self, session_maker: AsyncSessionFactory, task_client: Celery) -> None:
         super().__init__(session_maker)
         self.task_client = task_client

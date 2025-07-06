@@ -5,6 +5,8 @@ from redis.asyncio import Redis
 
 
 class CacheService:
+    """Service for caching"""
+
     def __init__(self, cache_client: Redis, ttl: int):
         self.cache = cache_client
         self.ttl = ttl

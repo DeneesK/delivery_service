@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional, Union
 
-from pydantic import BaseModel, ConfigDict, field_serializer, Field
+from pydantic import BaseModel, ConfigDict, field_serializer, Field, field_validator
 
 
 class ParcelTypeEnum(str, Enum):
@@ -15,10 +15,16 @@ class BaseSchema(BaseModel):
 
 
 class NewParcel(BaseSchema):
-    name: str
-    weight: float
+    name: str = Field(..., min_length=3, max_length=255)
+    weight: float = Field(..., gt=0)
     parcel_type: ParcelTypeEnum
     content_value_usd: float
+
+    @field_validator("name")
+    def name_must_be_alphanumeric(cls, v):
+        if not v.replace(" ", "").isalnum():
+            raise ValueError("name has to contain letters or digitals")
+        return v
 
 
 class ParcelCreated(NewParcel):

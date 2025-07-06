@@ -7,6 +7,10 @@ from dto.statics_dto import DailyStatisticsDTO, StatisticsOut
 
 
 class StatisticsService:
+    """
+    Service for calculating the cost of sent parcels based on cost calculation logs
+    """
+
     def __init__(self, client: AsyncIOMotorClient, db_name: str, collection: str):
         self.collection = client[db_name][collection]
 

@@ -13,6 +13,7 @@ from api.v1.schemas import (
     ParcelTypes,
     CompanyAssigned,
     CompanyAssignRequest,
+    ParcelTypeEnum,
 )
 from core.di_container import init_container
 from services.parcel import ParcelService
@@ -105,7 +106,7 @@ async def parcel_types(
 async def get_parcels(
     request: Request,
     container: Container = Depends(init_container),
-    parcel_type: Optional[str] = Query(None, description="Filter by parcel type "),
+    parcel_type: Optional[ParcelTypeEnum] = Query(None, description="Filter by parcel type "),
     has_delivery_cost: bool = Query(
         False, description="Filter by whether delivery cost is calculated"
     ),
