@@ -50,12 +50,10 @@ def create_app() -> FastAPI:
     )
     app.add_middleware(SessionIDMiddleware)
     app.add_middleware(SessionMiddleware, secret_key=config.SECRET_KEY)
-    app.add_exception_handler(NotFoundError, not_found_exception_handler)  # type: ignore
-    app.add_exception_handler(ValueError, validation_exception_handler)  # type: ignore
-    app.add_exception_handler(UnauthorizedError, unauthorized_exception_handler)  # type: ignore
+    app.add_exception_handler(NotFoundError, not_found_exception_handler)
+    app.add_exception_handler(ValueError, validation_exception_handler)
+    app.add_exception_handler(UnauthorizedError, unauthorized_exception_handler)
     app.add_exception_handler(Exception, generic_exception_handler)
-    app.add_exception_handler(
-        AlreadyAssignedError, already_assigned_exception_handler
-    )  # type: ignore
+    app.add_exception_handler(AlreadyAssignedError, already_assigned_exception_handler)
     app.include_router(v1_router)
     return app
