@@ -150,7 +150,7 @@ async def get_parcel_by_id(
     return parcel
 
 
-@router.post(
+@router.patch(
     "/{parcel_id}/assign-company",
     description="Assign parcel to a delivery company",
     response_model=CompanyAssigned,
