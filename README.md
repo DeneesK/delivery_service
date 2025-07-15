@@ -59,7 +59,9 @@ Swagger документация доступна после запуска пр
 - Создайте файл окружения на основе примера:  
 ```bash
 # ./env.example, delivery_app/env.example, register_app/env.example
-cp env.example .env
+cp ./env.example ./.env
+cp ./delivery_app/env.example delivery_app/.env
+cp ./register_app/env.example register_app/.env
 ```
 
 ## Запуск
