@@ -16,9 +16,9 @@ repos:
         exclude: 'migrations/'
 
   # isort для сортировки импортов
-  # - repo: https://github.com/pycqa/isort
-  #   rev: 5.13.2
-  #   hooks:
-  #     - id: isort
-  #       args: ["--profile=black"]
-  #       exclude: 'migrations/,tests/'
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ["--profile=black"]
+        exclude: 'migrations/,tests/'
