@@ -32,14 +32,14 @@ services:
       DESCRIPTION: "Test environment"
     volumes:
       - ./delivery_app:/app
-    command: [ "make", "start_app" ]
+    command: ["bash", "-c", "sleep 20 && make start_app"]
     ports:
       - "8000:8000"
   tests:
     build:
       context: ./
       dockerfile: tests/Dockerfile
-    command: [ "make", "start_tests" ]
+    command: ["bash", "-c", "sleep 20 && make start_tests"]
     depends_on:
       - delivery_app_test
   parcel_register_app:
