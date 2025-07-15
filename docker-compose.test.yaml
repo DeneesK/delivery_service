@@ -32,7 +32,7 @@ services:
       DESCRIPTION: "Test environment"
     volumes:
       - ./delivery_app:/app
-    command: [ "make", "start_app" ]
+    command: ["bash", "-c", "sleep 20 && make start-app"]
     ports:
       - "8000:8000"
   tests:
