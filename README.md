@@ -1,4 +1,5 @@
 # Delivery Service
+![Tests](https://github.com/DeneesK/delivery_service/actions/workflows/test.yml/badge.svg)
 
 Сервис для управления посылками с расчетом стоимости доставки и привязкой к транспортным компаниям
 

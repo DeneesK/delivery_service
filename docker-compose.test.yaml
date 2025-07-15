@@ -39,7 +39,7 @@ services:
     build:
       context: ./
       dockerfile: tests/Dockerfile
-    command: ["bash", "-c", "sleep 20 && make start_tests"]
+    command: ["bash", "-c", "sleep 30 && make start_tests"]
     depends_on:
       - delivery_app_test
   parcel_register_app:
