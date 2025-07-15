@@ -57,6 +57,7 @@ Swagger документация доступна после запуска пр
 - Установите `make` (если ещё не установлен)  
 - Создайте файл окружения на основе примера:  
 ```bash
+# ./env.example, delivery_app/env.example, register_app/env.example
 cp env.example .env
 ```
 
