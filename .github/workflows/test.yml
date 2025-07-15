@@ -13,9 +13,9 @@ jobs:
     steps:
       - name: Create .env file
         run: |
-          cp delivery_app/env.example delivery_app/.env
-          cp register_app/env.example register_app/.env
           cp ./env.example ./.env
+          cp ./delivery_app/env.example delivery_app/.env
+          cp ./register_app/env.example register_app/.env
       - name: Checkout code
         uses: actions/checkout@v4
 
