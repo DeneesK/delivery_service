@@ -11,24 +11,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Print current directory and list files
         run: |
           pwd
           ls -la
-      - name: Create .env file
+
+      - name: Create .env files
         run: |
           cp ./env.example ./.env
           cp ./delivery_app/env.example delivery_app/.env
           cp ./register_app/env.example register_app/.env
-      - name: Checkout code
-        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
       - name: Run tests
-        run: |
-          docker compose -f docker-compose.test.yaml up --build --exit-code-from tests
+        run: docker compose -f docker-compose.test.yaml up --build --exit-code-from tests
+
       - name: Tear down containers
         if: always()
         run: docker compose -f docker-compose.test.yaml down --volumes
