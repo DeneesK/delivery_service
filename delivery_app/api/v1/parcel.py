@@ -95,8 +95,8 @@ async def get_parcels(
     request: Request,
     container: Container = Depends(init_container),
     parcel_type: Optional[ParcelTypeEnum] = Query(None, description="Filter by parcel type "),
-    has_delivery_cost: bool = Query(
-        False, description="Filter by whether delivery cost is calculated"
+    has_delivery_cost: Optional[bool] = Query(
+        None, description="Filter by whether delivery cost is calculated"
     ),
     limit: int = Query(100, ge=1, description="Limit number of results"),
     offset: int = Query(0, ge=0, description="Number of results to skip"),

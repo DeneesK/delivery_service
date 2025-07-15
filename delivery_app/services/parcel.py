@@ -73,7 +73,7 @@ class ParcelService(DBObjectService):
 
             if has_delivery_cost:
                 stmt = stmt.where(Parcel.delivery_cost_rub.is_not(None))
-            else:
+            elif has_delivery_cost is False:
                 stmt = stmt.where(Parcel.delivery_cost_rub.is_(None))
 
             stmt = stmt.offset(offset).limit(limit)
