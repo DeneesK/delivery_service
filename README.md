@@ -71,7 +71,8 @@ make start_app
 ```
 
 ## Запуск тестов
-
+1. <b><i>Запускаются автоматически через GitHub Actions при push
+2. Запуск локально:</b></i>
 ```bash
 make start_tests
 ```
