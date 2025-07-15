@@ -11,11 +11,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: List files for debugging
+        run: ls -lR
       - name: Create .env file
         run: |
-          cp delivery_service/env.example ./.env
-          cp delivery_service/delivery_app/env.example delivery_app/.env
-          cp delivery_service/register_app/env.example register_app/.env
+          cp ./env.example ./.env
+          cp ./delivery_app/env.example delivery_app/.env
+          cp ./register_app/env.example register_app/.env
       - name: Checkout code
         uses: actions/checkout@v4
 
