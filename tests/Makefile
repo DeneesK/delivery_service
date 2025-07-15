@@ -1,3 +1,3 @@
 .PHONY: start_tests
-start-tests:
+start_tests:
 	pytest tests/
