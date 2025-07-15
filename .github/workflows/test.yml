@@ -11,6 +11,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Create .env file
+        run: |
+          cp delivery_service/env.example delivery_service/.env
+          cp register_service/env.example register_service/.env
+          cp ./env.example ./.env
       - name: Checkout code
         uses: actions/checkout@v4
 
