@@ -17,8 +17,8 @@ class BaseSchema(BaseModel):
 class NewParcel(BaseSchema):
     name: str = Field(..., min_length=3, max_length=255)
     weight: float = Field(..., gt=0)
-    parcel_type: ParcelTypeEnum
-    content_value_usd: float
+    parcel_type: ParcelTypeEnum = Field(...)
+    content_value_usd: float = Field(..., ge=0)
 
     @field_validator("name")
     def name_must_be_alphanumeric(cls, v):
@@ -28,15 +28,15 @@ class NewParcel(BaseSchema):
 
 
 class ParcelCreated(NewParcel):
-    parcel_id: str
+    parcel_id: str = Field(...)
 
 
 class ParcelID(BaseSchema):
-    parcel_id: str
+    parcel_id: str = Field(...)
 
 
 class ParcelOut(ParcelCreated):
-    delivery_cost_rub: Optional[float | str]
+    delivery_cost_rub: Optional[float | str] = Field(default=None)
 
     @field_serializer("delivery_cost_rub", return_type=Union[float, str])
     def serialize_delivery_cost_rub(self, value):
@@ -44,31 +44,31 @@ class ParcelOut(ParcelCreated):
 
 
 class Parcels(BaseSchema):
-    parcels: list[ParcelOut | None]
+    parcels: list[ParcelOut | None] = Field(...)
 
 
 class ParcelType(BaseSchema):
-    id: int
-    name: str
+    id: int = Field(...)
+    name: str = Field(...)
 
 
 class ParcelTypes(BaseSchema):
-    parcel_types: list[ParcelType]
+    parcel_types: list[ParcelType] = Field(...)
 
 
 class StatisticsOut(BaseSchema):
-    date: str
-    parcel_type: str
-    total_cost: float
+    date: str = Field(...)
+    parcel_type: str = Field(...)
+    total_cost: float = Field(...)
 
 
 class DailyStatisticsResponse(BaseSchema):
-    data: list[StatisticsOut]
+    data: list[StatisticsOut] = Field(...)
 
 
 class CompanyAssigned(BaseSchema):
-    parcel_id: str
-    company_id: int
+    parcel_id: str = Field(...)
+    company_id: int = Field(...)
 
 
 class CompanyAssignRequest(BaseSchema):
