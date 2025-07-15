@@ -13,8 +13,8 @@ jobs:
     steps:
       - name: Create .env file
         run: |
-          cp delivery_service/env.example delivery_service/.env
-          cp register_service/env.example register_service/.env
+          cp delivery_app/env.example delivery_app/.env
+          cp register_app/env.example register_app/.env
           cp ./env.example ./.env
       - name: Checkout code
         uses: actions/checkout@v4
