@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional, Union
 
-from pydantic import BaseModel, ConfigDict, field_serializer, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_serializer, field_validator
 
 
 class ParcelTypeEnum(str, Enum):
@@ -18,7 +18,7 @@ class NewParcel(BaseSchema):
     name: str = Field(..., min_length=3, max_length=255)
     weight: float = Field(..., gt=0)
     parcel_type: ParcelTypeEnum = Field(...)
-    content_value_usd: float = Field(..., ge=0)
+    content_value_usd: float = Field(..., gt=0)
 
     @field_validator("name")
     def name_must_be_alphanumeric(cls, v):
@@ -36,7 +36,7 @@ class ParcelID(BaseSchema):
 
 
 class ParcelOut(ParcelCreated):
-    delivery_cost_rub: Optional[float | str] = Field(default=None)
+    delivery_cost_rub: Optional[float | str] = Field(default="Not calculated")
 
     @field_serializer("delivery_cost_rub", return_type=Union[float, str])
     def serialize_delivery_cost_rub(self, value):
@@ -48,7 +48,7 @@ class Parcels(BaseSchema):
 
 
 class ParcelType(BaseSchema):
-    id: int = Field(...)
+    id: int = Field(..., gt=0)
     name: str = Field(...)
 
 
@@ -58,7 +58,7 @@ class ParcelTypes(BaseSchema):
 
 class StatisticsOut(BaseSchema):
     date: str = Field(...)
-    parcel_type: str = Field(...)
+    parcel_type: str = Field(..., gt=0)
     total_cost: float = Field(...)
 
 
