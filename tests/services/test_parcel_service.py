@@ -14,7 +14,7 @@ async def test_mock_new_parcel_success(mock_task_client, mock_session):
 
     mock_task_client.send_task.assert_called_once()
     called_args = mock_task_client.send_task.call_args.args
-    assert called_args[0] == "consumer.tasks.register_parcel_task"
+    assert called_args[0] == "register_app.tasks.register_parcel_task"  # TODO: name вынести в conf
 
     parcel_data_arg = called_args[1][0]
     assert parcel_data_arg["name"] == "Parcel1"
