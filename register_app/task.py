@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 @app.task(
-    name="register_parcel_task.tasks.register_parcel_task", acks_late=True
+    name="register_app.tasks.register_parcel_task", acks_late=True
 )  # TODO: name вынести в conf
 def register_parcel_task(parcel_data: dict):
     """save new parcel to db with calculated delivery cost"""

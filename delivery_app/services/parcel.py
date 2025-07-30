@@ -38,7 +38,7 @@ class ParcelService(DBObjectService):
         }
         await anyio.to_thread.run_sync(
             lambda: self.task_client.send_task(
-                "register_parcel_task.tasks.register_parcel_task", [parcel_data]
+                "register_app.tasks.register_parcel_task", [parcel_data]
             )  # TODO: name вынести в conf
         )
         return parcel_id
