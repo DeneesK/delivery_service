@@ -1,20 +1,22 @@
 import logging
 
+from pymongo.collection import Collection
 from redis import Redis
 from sqlalchemy.orm import Session
-from pymongo.collection import Collection
 
 from celery_app import app
-from utils.currency_rate import get_usd_to_rub
+from core.conf import Settings
+from core.di_container import init_container
 from db.models.parcel import Parcel
 from utils.cost_log import insert_log
-from core.di_container import init_container
-from core.conf import Settings
+from utils.currency_rate import get_usd_to_rub
 
 logger = logging.getLogger(__name__)
 
 
-@app.task(name="consumer.tasks.register_parcel_task", acks_late=True)
+@app.task(
+    name="register_parcel_task.tasks.register_parcel_task", acks_late=True
+)  # TODO: name вынести в conf
 def register_parcel_task(parcel_data: dict):
     """save new parcel to db with calculated delivery cost"""
     try:

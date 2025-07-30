@@ -3,13 +3,13 @@ from uuid import uuid4
 import anyio
 import anyio.to_thread
 from celery import Celery  # type: ignore
-from sqlalchemy import select
 
+from core.exceptions import NotFoundError
 from db.db import AsyncSessionFactory
 from db.models.parcel import Parcel, ParcelType
+from dto.parcel_dto import ParcelDTO, ParcelsDTO, ParcelTypeDTO, ParcelTypesDTO
 from services.common import DBObjectService
-from dto.parcel_dto import ParcelDTO, ParcelsDTO, ParcelTypesDTO, ParcelTypeDTO
-from core.exceptions import NotFoundError
+from sqlalchemy import select
 
 
 class ParcelService(DBObjectService):
@@ -37,7 +37,9 @@ class ParcelService(DBObjectService):
             "parcel_id": parcel_id,
         }
         await anyio.to_thread.run_sync(
-            lambda: self.task_client.send_task("consumer.tasks.register_parcel_task", [parcel_data])
+            lambda: self.task_client.send_task(
+                "register_parcel_task.tasks.register_parcel_task", [parcel_data]
+            )  # TODO: name вынести в conf
         )
         return parcel_id
 
@@ -60,14 +62,13 @@ class ParcelService(DBObjectService):
         self,
         owner: str,
         parcel_type: str | None,
-        has_delivery_cost: bool,
+        has_delivery_cost: bool | None,
         limit: int = 100,
         offset: int = 0,
     ) -> ParcelsDTO:
         """Get all parcels by owner, optionally filtered"""
         async with self.session_maker() as session:
             stmt = select(Parcel).where(Parcel.owner == owner)
-
             if parcel_type:
                 stmt = stmt.where(Parcel.parcel_type == parcel_type)
 
